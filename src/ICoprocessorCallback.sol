@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.28;
 
@@ -7,6 +7,9 @@ interface ICoprocessorOutputs {
 }
 
 interface ICoprocessorCallback {
-    function coprocessorCallbackOutputsOnly(bytes32 machineHash, bytes32 payloadHash, bytes[] calldata outputs)
-        external;
+    function coprocessorCallbackOutputsOnly(
+        bytes32 machineHash,
+        bytes32 payloadHash,
+        bytes[] calldata outputs
+    ) external;
 }

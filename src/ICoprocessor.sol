@@ -1,7 +1,11 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.28;
 
 interface ICoprocessor {
-    function issueTask(bytes32 machineHash, bytes calldata input, address callbackAddress) external;
+    function issueTask(
+        bytes32 machineHash,
+        bytes calldata input,
+        address callbackAddress
+    ) external;
 }

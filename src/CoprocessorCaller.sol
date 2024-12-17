@@ -1,14 +1,18 @@
-// SPDX-License-Identifier: Apache-2.0
-
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "./ICoprocessor.sol";
-import "./ICoprocessorCallback.sol";
+import "@cartesi-coprocessor/ICoprocessor.sol";
+import "@cartesi-coprocessor/ICoprocessorCallback.sol";
 
 abstract contract CoprocessorCaller is ICoprocessorCallback {
     ICoprocessor public coprocessor;
     bytes32 public machineHash;
-    bytes public lastResult;
+
+    error UnauthorizedCaller(address caller);
+    error InvalidOutputLength(uint256 length);
+    error ComputationNotFound(bytes32 payloadHash);
+    error MachineHashMismatch(bytes32 current, bytes32 expected);
+    error InvalidOutputSelector(bytes4 selector, bytes4 expected);
 
     mapping(bytes32 => bool) public computationSent;
 
@@ -30,21 +34,34 @@ abstract contract CoprocessorCaller is ICoprocessorCallback {
         bytes32 _payloadHash,
         bytes[] calldata outputs
     ) external override {
-        require(msg.sender == address(coprocessor), "Unauthorized caller");
-        require(_machineHash == machineHash, "Machine hash mismatch");
-        require(computationSent[_payloadHash], "Computation not found");
+        if (msg.sender != address(coprocessor)) {
+            revert UnauthorizedCaller(msg.sender);
+        }
+
+        if (_machineHash != machineHash) {
+            revert MachineHashMismatch(_machineHash, machineHash);
+        }
+
+        if (!computationSent[_payloadHash]) {
+            revert ComputationNotFound(_payloadHash);
+        }
 
         for (uint256 i = 0; i < outputs.length; i++) {
             bytes calldata output = outputs[i];
-            require(output.length > 3, "Too short output");
+
+            if (output.length <= 3) {
+                revert InvalidOutputLength(output.length);
+            }
 
             bytes4 selector = bytes4(output[:4]);
             bytes calldata arguments = output[4:];
 
-            require(
-                selector == ICoprocessorOutputs.Notice.selector,
-                "Invalid output selector"
-            );
+            if (selector != ICoprocessorOutputs.Notice.selector) {
+                revert InvalidOutputSelector(
+                    selector,
+                    ICoprocessorOutputs.Notice.selector
+                );
+            }
 
             handleNotice(arguments);
         }
