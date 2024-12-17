@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@cartesi-coprocessor/CoprocessorCaller.sol";
+import "../../src/CoprocessorCaller.sol";
 
 contract CoprocessorCallerSample is CoprocessorCaller {
     constructor(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {ICoprocessor} from "@cartesi-coprocessor/ICoprocessor.sol";
+import {ICoprocessor} from "../../src/ICoprocessor.sol";
 
 contract CoprocessorMock is ICoprocessor {
     event TaskIssued(bytes32 machineHash, bytes input, address callback);

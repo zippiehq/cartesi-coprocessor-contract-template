@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@cartesi-coprocessor/ICoprocessor.sol";
-import "@cartesi-coprocessor/ICoprocessorCallback.sol";
+import "./ICoprocessor.sol";
+import "./ICoprocessorCallback.sol";
 
 abstract contract CoprocessorCaller is ICoprocessorCallback {
     ICoprocessor public coprocessor;
