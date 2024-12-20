@@ -106,7 +106,7 @@ contract TestCoprocessorCallerSampl is Test {
         bytes memory voucher = abi.encodeWithSignature(
             "Voucher(address,uint256,bytes)",
             address(counter),
-            1596,
+            2024,
             encoded_tx
         );
 
@@ -130,7 +130,7 @@ contract TestCoprocessorCallerSampl is Test {
         );
 
         uint256 number = counter.number();
-        assertEq(number, 2024);
+        assertEq(number, 1596);
     }
 
     function testCallCoprocessorCallerSampleWithInvalidMachineHash() public {
