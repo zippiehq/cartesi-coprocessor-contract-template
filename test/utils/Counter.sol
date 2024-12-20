@@ -8,6 +8,10 @@ contract Counter {
         number = newNumber;
     }
 
+    function setNumberPaid(uint256 newNumber) public payable {
+        number = newNumber;
+    }
+
     function increment() public {
         number++;
     }

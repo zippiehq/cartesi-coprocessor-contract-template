@@ -7,7 +7,7 @@ import {console} from "forge-std/console.sol";
 import {CoprocessorMock} from "./mock/CoprocessorMock.sol";
 import {CoprocessorCallerSample} from "./utils/CoprocessorCallerSample.sol";
 
-contract TestCoprocessorCallerSample is Test {
+contract TestCoprocessorCallerSampl is Test {
     address caller = vm.addr(4);
 
     bytes32 machineHash = bytes32(0);
@@ -16,15 +16,13 @@ contract TestCoprocessorCallerSample is Test {
     CoprocessorMock mock;
     CoprocessorCallerSample sample;
 
-    event TaskIssued(bytes32 machineHash, bytes input, address callback);
-
     function setUp() public {
         counter = new Counter();
         mock = new CoprocessorMock();
         sample = new CoprocessorCallerSample(address(mock), machineHash);
     }
 
-    function testCallCoprocessorCallerSampleWithValidInput() public {
+    function testCallCoprocessorCallerSampleWithValilNoticeInput() public {
         bytes memory encoded_tx = abi.encodeWithSignature(
             "setNumber(uint256)",
             1596
@@ -41,7 +39,7 @@ contract TestCoprocessorCallerSample is Test {
 
         vm.expectEmit();
 
-        emit TaskIssued(machineHash, payload, address(sample));
+        emit CoprocessorMock.TaskIssued(machineHash, payload, address(sample));
 
         sample.callCoprocessor(payload);
 
@@ -53,8 +51,86 @@ contract TestCoprocessorCallerSample is Test {
             outputs
         );
 
-        uint256 balance = counter.number();
-        assertEq(balance, 1596);
+        uint256 number = counter.number();
+        assertEq(number, 1596);
+    }
+
+    function testCallCoprocessorCallerSampleWithValidVoucherInput() public {
+        bytes memory encoded_tx = abi.encodeWithSignature(
+            "setNumber(uint256)",
+            1596
+        );
+
+        bytes memory payload = abi.encode(address(counter), encoded_tx);
+
+        sample.callCoprocessor(payload);
+
+        bytes memory voucher = abi.encodeWithSignature(
+            "Voucher(address,uint256,bytes)",
+            address(counter),
+            0,
+            encoded_tx
+        );
+
+        bytes[] memory outputs = new bytes[](1);
+        outputs[0] = voucher;
+
+        vm.expectEmit();
+
+        emit CoprocessorMock.TaskIssued(machineHash, payload, address(sample));
+
+        sample.callCoprocessor(payload);
+
+        vm.prank(address(mock));
+
+        sample.coprocessorCallbackOutputsOnly(
+            machineHash,
+            keccak256(payload),
+            outputs
+        );
+
+        uint256 number = counter.number();
+        assertEq(number, 1596);
+    }
+
+    function testCallCoprocessorCallerSampleWithValidVoucherInputAndValue() public {
+        bytes memory encoded_tx = abi.encodeWithSignature(
+            "setNumberPaid(uint256)",
+            1596
+        );
+
+        bytes memory payload = abi.encode(address(counter), encoded_tx);
+
+        sample.callCoprocessor(payload);
+
+        bytes memory voucher = abi.encodeWithSignature(
+            "Voucher(address,uint256,bytes)",
+            address(counter),
+            1596,
+            encoded_tx
+        );
+
+        bytes[] memory outputs = new bytes[](1);
+        outputs[0] = voucher;
+
+        vm.expectEmit();
+
+        emit CoprocessorMock.TaskIssued(machineHash, payload, address(sample));
+
+        vm.deal(address(sample), 2024);
+        
+        sample.callCoprocessor(payload);
+
+        vm.prank(address(mock));
+
+        sample.coprocessorCallbackOutputsOnly(
+            machineHash,
+            keccak256(payload),
+            outputs
+        );
+
+        uint256 number = counter.number();
+        assertEq(number, 2024);
     }
 
     function testCallCoprocessorCallerSampleWithInvalidMachineHash() public {
@@ -74,7 +150,7 @@ contract TestCoprocessorCallerSample is Test {
 
         vm.expectEmit();
 
-        emit TaskIssued(machineHash, payload, address(sample));
+        emit CoprocessorMock.TaskIssued(machineHash, payload, address(sample));
 
         sample.callCoprocessor(payload);
 
@@ -108,7 +184,7 @@ contract TestCoprocessorCallerSample is Test {
 
         vm.expectEmit();
 
-        emit TaskIssued(machineHash, payload, address(sample));
+        emit CoprocessorMock.TaskIssued(machineHash, payload, address(sample));
 
         sample.callCoprocessor(payload);
 
